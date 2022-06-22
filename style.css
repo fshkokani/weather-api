@@ -1,6 +1,7 @@
 html{
     background-image: url(./Weather.jpeg);
     background-size: cover;
+    background-repeat: no-repeat;
 }
 body{
     display: grid;
