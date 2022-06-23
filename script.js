@@ -21,7 +21,7 @@ const requestWeather = async (url) => {
 };
 // Data extract function
 const weather = async (location) => { 
-    let url = `http://api.weatherapi.com/v1/forecast.json?key=e76d66218c9a4eda932221659220706&q=${location}`;
+    let url = `https://api.weatherapi.com/v1/forecast.json?key=e76d66218c9a4eda932221659220706&q=${location}`;
     let data = await requestWeather(url);
 
     // Update HTML
