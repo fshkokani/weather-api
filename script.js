@@ -10,7 +10,6 @@ let parameter;
 // etablish a connection with the weather api:
 // fetch request
 const requestWeather = async (url) => {
-    console.log("3")
 
     let response = await fetch(url);
     if(!response.ok){
@@ -22,7 +21,7 @@ const requestWeather = async (url) => {
 };
 // Data extract function
 const weather = async (location) => { 
-    let url = `http://api.weatherapi.com/v1/forecast.json?key=<>=${location}&days=7`;
+    let url = `http://api.weatherapi.com/v1/forecast.json?key=e76d66218c9a4eda932221659220706&q=${location}`;
     let data = await requestWeather(url);
 
     // Update HTML
