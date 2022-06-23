@@ -8,6 +8,7 @@ headers: {
     // 'Access-Control-Allow-Headers'
     // 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization, Content-Language, Accept, Accept-Language' always;
 },
+mode: 'cors',
 });
     const jsonResponse = await fetchRequest.json();
     return jsonResponse
