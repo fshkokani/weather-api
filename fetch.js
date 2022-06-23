@@ -1,105 +1,107 @@
-const userCity = document.getElementById("city");
-const submitBtn = document.getElementById("submitBtn");
-const currentWeather = document.getElementById("weather");
-const cityBtns = document.getElementById("bonus-buttons");
+let weatherDiv = document.getElementById("weather");
+let citiesDiv = document.getElementById("cities");
+let subButton = document.getElementById('button');
+let subkey = document.getElementById('city');
+let cities =[];
+let parameter;
 
-const cityStorage = {
-  currentCity: "",
-  cityArr: [],
-  setCurrentCity(city) {
-    this.currentCity = city;
-    localStorage.setItem("current-city", this.currentCity);
-  },
-  setCityArr(incomingCity) {
-    for (let i = 0; i < this.cityArr.length; i++) {
-      const cityInArray = this.cityArr[i];
-      if (incomingCity.toLowerCase() === cityInArray.toLowerCase()) {
-        return;
-      }
+ 
+
+// etablish a connection with the weather api:
+// fetch request
+const requestWeather = async (url) => {
+
+    let response = await fetch(url);
+    if(!response.ok){
+        parameter=10;
+        throw new Error(`There is an error with status ${response.status}`)
+    };
+    let weatherJson = await response.json();
+    return weatherJson;
+};
+// Data extract function
+const weather = async (location) => { 
+    let url = `http://api.weatherapi.com/v1/forecast.json?key=e76d66218c9a4eda932221659220706&q=${location}`;
+    let data = await requestWeather(url);
+
+    // Update HTML
+    weatherDiv.innerHTML = ` 
+            <h2 id="date">${data.forecast.forecastday[0].date}</h2>
+            <h2 id="city">${data.location.name} <br> ${data.location.region} <br> ${data.location.country}</h2>
+            <h3 id="tempreture">${data.current.temp_f} F</h3>
+            <img src="${data.current.condition.icon}"  alt="weather icon">
+            <h3 id="condition">${data.current.condition.text}</h3>
+            <div id="more-details">
+            <h6><span>${data.current.feelslike_f}</span><br>Feels Like</h6>
+            <h6><span>${data.current.wind_mph} mph</span><br>Wind Speed</h6>
+            <h6><span>${data.current.humidity} % </span><br>Humidity</h6>
+            </div>`;
+            if (parameter===10){
+                cities.push(newCity.name);
+                newCity.submitting(newCity.name);
+                parameter=0;
+            }
+            window.localStorage.setItem('keys', JSON.stringify(cities));
+            
+};
+
+// create an object city:
+let newCity = {
+   _name: 'name',
+   get name(){
+       return this._name
+   },
+   set name(newName){
+       this._name = newName
+   },
+    getweather(param){
+    weather(param);
+    },
+    submitting(param){
+        let cityButton = document.createElement('button')
+        cityButton.innerHTML=`<button id="${param}" type="button" value="${param}">${param}</button>`
+        citiesDiv.appendChild(cityButton);
+        document.getElementById(param).addEventListener('click', eventhandlerFunc);
+
+        }  
+    };
+
+// event handler function
+eventhandlerFunc = (event) => {
+event.preventDefault();
+let location;
+
+
+if ((event.target === subButton) || (event.value === 'Enter') ){ // Any submittion from the input box
+    location = document.getElementById('city').value;
+    if (location === ""){
+        return "not working";
     }
-    this.cityArr.push(incomingCity);
-    console.log(this.cityArr);
-    localStorage.setItem("cities", JSON.stringify(this.cityArr));
-  },
-  getCurrentCity() {
-    this.currentCity = localStorage.getItem("current-city");
-    return this.currentCity;
-  },
-  getCityArr() {
-    if (localStorage.getItem("cities")) {
-      this.cityArr = JSON.parse(localStorage.getItem("cities"));
+    location = location.toLowerCase().trim();
+    newCity.name = location;
+    
+    if (document.getElementById(location)){ // The city was searched for last time
+        newCity.getweather(newCity.name);
     }
-    return this.cityArr;
-  },
-};
+    else{
+        parameter=10;
+        newCity.getweather(newCity.name); // New city submitted to be searched for.
+}
 
-const getWeather = (city) => {
-  return fetch(
-    `https://api.weatherapi.com/v1/current.json?key=46e1df487c204aaea80231816211312&q=${city}`
-  );
-};
+} else {
+    location = event.target.innerHTML; // Submittion of history buttons
+    newCity.name = location;
+    newCity.getweather(newCity.name);
+}}
 
-const displayWeather = async (city) => {
-  cityStorage.setCurrentCity(city);
-  cityStorage.setCityArr(city);
-  const response = await getWeather(city);
-  const data = await response.json();
-  let weather = data.current;
-  currentWeather.innerHTML = `
-    <h2>${city}</h2>
-    <h3>${weather.condition.text}</h3>
-    <img src="https:${weather.condition.icon}" alt="${weather.condition.text}">
-    <h3>Humidity: ${weather.humidity}</h3>
-    <h3>Temperature: ${weather.temp_f}</h3>
-    <h3>Feels Like: ${weather.feelslike_f}</h3>
-    <h3>Wind: ${weather.wind_mph}</h3>
-    `;
-};
+eventhandlerFunc2 =()=>{
+    let storage = JSON.parse(localStorage.getItem('keys'));
+    storage.forEach((cityHistory)=>{
+        newCity.name= cityHistory;
+        newCity.submitting(newCity.name)
 
-const setClickedCity = (event) => {
-  let city = event.target.innerHTML;
-  cityStorage.setCurrentCity(city);
-  displayWeather(city);
-};
-
-const displayCityButtons = () => {
-  cityBtns.innerHTML = "";
-  cityStorage.cityArr.forEach((city) => {
-    cityBtns.innerHTML += `<button type="button" onclick="setClickedCity(event)" id="submitBtn">${city}</button>`;
-  });
-};
-
-const pageLoad = () => {
-  const currentCity = cityStorage.getCurrentCity();
-  cityStorage.getCityArr();
-  if (currentCity) {
-    displayWeather(currentCity);
-    displayCityButtons();
-  }
-};
-
-submitBtn.addEventListener("click", function (e) {
-  e.preventDefault();
-  let currentCity = userCity.value.trim();
-  if (currentCity === ""){
-    return;
-  }
-  displayWeather(currentCity);
-  displayCityButtons();
-  userCity.value = "";
-});
-
-userCity.addEventListener("onkeydown", function (e) {
-  e.preventDefault();
-  let currentCity = userCity.value.trim();
-  if (currentCity === ""){
-    return;
-  }
-  if (e.keyCode == 13) {
-    displayWeather(currentCity);
-    displayCityButtons();
-    userCity.value = "";
-  }
-});
-
-pageLoad();
+    })
+}
+subButton.addEventListener('click', eventhandlerFunc);
+//subkey.addEventListener('keydown',eventhandlerFunc)
+window.addEventListener('load',eventhandlerFunc2)
